@@ -426,71 +426,145 @@ class _ScannerScreenViewState extends State<_ScannerScreenView> {
                   clipBehavior: Clip.hardEdge,
                   child: SingleChildScrollView(
                     scrollDirection: Axis.vertical,
-                    child: SingleChildScrollView(
-                      scrollDirection: Axis.horizontal,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          minWidth: MediaQuery.of(context).size.width - 34,
+                    child: Table(
+                      columnWidths: const {
+                        0: FixedColumnWidth(80),
+                        1: FlexColumnWidth(),
+                        2: FixedColumnWidth(80),
+                      },
+                      border: const TableBorder(
+                        horizontalInside: BorderSide(
+                          color: MockupColors.cardBorder,
+                          width: 1,
                         ),
-                        child: DataTable(
-                          columnSpacing: 16,
-                          horizontalMargin: 12,
-                          headingRowColor: WidgetStateProperty.all(
-                            MockupColors.cardBackground,
+                      ),
+                      defaultVerticalAlignment: TableCellVerticalAlignment.middle,
+                      children: [
+                        const TableRow(
+                          decoration: BoxDecoration(
+                            color: MockupColors.cardBackground,
                           ),
-                          dividerThickness: 1,
-                          columns: const [
-                            DataColumn(label: Text('Reset')),
-                            DataColumn(label: Text('Code')),
-                            DataColumn(label: Text('Quantity')),
+                          children: [
+                            TableCell(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                child: Text(
+                                  'Reset',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: MockupColors.textWhite,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
+                            TableCell(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                child: Text(
+                                  'Code',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: MockupColors.textWhite,
+                                  ),
+                                ),
+                              ),
+                            ),
+                            TableCell(
+                              child: Padding(
+                                padding: EdgeInsets.symmetric(
+                                  vertical: 12,
+                                  horizontal: 8,
+                                ),
+                                child: Text(
+                                  'Quantity',
+                                  style: TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: MockupColors.textWhite,
+                                  ),
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ),
                           ],
-                          rows: state.inspectionList.asMap().entries.map((
-                            entry,
-                          ) {
-                            final index = entry.key;
-                            final item = entry.value;
-                            final isEditing = state.editingIndex == index;
-                            return DataRow(
-                              cells: [
-                                DataCell(
-                                  GestureDetector(
-                                    onTap: () => cubit.selectItemForEdit(index),
-                                    child: Container(
-                                      padding: const EdgeInsets.symmetric(
-                                        horizontal: 10,
-                                        vertical: 4,
-                                      ),
-                                      decoration: BoxDecoration(
-                                        color: isEditing
-                                            ? MockupColors.warningAmber
-                                            : MockupColors.mint,
-                                        borderRadius: BorderRadius.circular(6),
-                                      ),
-                                      child: Text(
-                                        'Reset',
-                                        style: TextStyle(
+                        ),
+                        ...state.inspectionList.asMap().entries.map((entry) {
+                          final index = entry.key;
+                          final item = entry.value;
+                          final isEditing = state.editingIndex == index;
+                          return TableRow(
+                            children: [
+                              TableCell(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 8,
+                                    ),
+                                    child: GestureDetector(
+                                      onTap: () => cubit.selectItemForEdit(index),
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                          horizontal: 10,
+                                          vertical: 4,
+                                        ),
+                                        decoration: BoxDecoration(
                                           color: isEditing
-                                              ? MockupColors.pageBackground
-                                              : MockupColors.pageBackground,
-                                          fontWeight: FontWeight.bold,
-                                          fontSize: 12,
+                                              ? MockupColors.warningAmber
+                                              : MockupColors.mint,
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: const Text(
+                                          'Reset',
+                                          style: TextStyle(
+                                            color: MockupColors.pageBackground,
+                                            fontWeight: FontWeight.bold,
+                                            fontSize: 12,
+                                          ),
                                         ),
                                       ),
                                     ),
                                   ),
                                 ),
-                                DataCell(
-                                  ExpandableTextWidget(
+                              ),
+                              TableCell(
+                                child: Padding(
+                                  padding: const EdgeInsets.symmetric(
+                                    vertical: 8,
+                                    horizontal: 8,
+                                  ),
+                                  child: ExpandableTextWidget(
                                     text: item.value,
                                     threshold: 30,
                                   ),
                                 ),
-                                DataCell(Text(item.quantity.toString())),
-                              ],
-                            );
-                          }).toList(),
-                        ),
-                      ),
+                              ),
+                              TableCell(
+                                child: Center(
+                                  child: Padding(
+                                    padding: const EdgeInsets.symmetric(
+                                      vertical: 8,
+                                      horizontal: 8,
+                                    ),
+                                    child: Text(
+                                      item.quantity.toString(),
+                                      style: const TextStyle(
+                                        color: MockupColors.textWhite,
+                                      ),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ],
+                          );
+                        }),
+                      ],
                     ),
                   ),
                 ),

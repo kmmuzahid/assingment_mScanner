@@ -1,4 +1,5 @@
 import 'dart:async';
+import 'dart:io';
 
 import 'package:bloc/bloc.dart';
 import 'package:camera/camera.dart';
@@ -21,9 +22,9 @@ class ScannerCubit extends Cubit<ScannerState> {
   final Map<String, int> _scanSamples = {};
   Timer? _sampleTimer;
 
-  static const int _minSamples = 8;
+  static const int _minSamples = 5;
 
-  static const int _maxSamples = 15;
+  static const int _maxSamples = 10;
 
   static const double _confidenceThreshold = 1;
 
@@ -130,7 +131,7 @@ class ScannerCubit extends Cubit<ScannerState> {
 
     var tickCount = 0;
 
-    _sampleTimer = Timer.periodic(const Duration(milliseconds: 100), (timer) {
+    _sampleTimer = Timer.periodic(const Duration(milliseconds: 300), (timer) {
       tickCount++;
       final totalSamples = _scanSamples.values.fold<int>(0, (a, b) => a + b);
 
@@ -293,8 +294,8 @@ class ScannerCubit extends Cubit<ScannerState> {
         .where((e) => e.isNotEmpty)
         .toList();
     if (lines.isEmpty) return '';
-    // Keep first non-empty line, and collapse multiple spaces into a single space
-    return lines.first.replaceAll(RegExp(r'\s+'), ' ');
+    // Join all non-empty lines with a space, and collapse multiple spaces into a single space
+    return lines.join(' ').replaceAll(RegExp(r'\s+'), ' ');
   }
 
   Future<void> _performOcrScan() async {
@@ -306,6 +307,14 @@ class ScannerCubit extends Cubit<ScannerState> {
       final image = await cameraController!.takePicture();
       final inputImage = InputImage.fromFilePath(image.path);
       final recognizedText = await textRecognizer.processImage(inputImage);
+
+      // Delete the temporary image file to avoid cluttering storage
+      try {
+        final file = File(image.path);
+        if (file.existsSync()) {
+          file.deleteSync();
+        }
+      } catch (_) {}
 
       final cleaned = _cleanOcrText(recognizedText.text);
 

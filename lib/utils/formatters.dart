@@ -13,6 +13,17 @@ String formatTimeAMPM(DateTime time) {
   return '$monthStr ${localTime.day} ${localTime.year} $formattedHour:$minute $ampm';
 }
 
+String formatSavedFileDate(DateTime time) {
+  final localTime = time.toLocal();
+  final year = localTime.year.toString();
+  final month = localTime.month.toString().padLeft(2, '0');
+  final day = localTime.day.toString().padLeft(2, '0');
+  final hour = localTime.hour.toString().padLeft(2, '0');
+  final minute = localTime.minute.toString().padLeft(2, '0');
+  final second = localTime.second.toString().padLeft(2, '0');
+  return '$year/$month/$day $hour:$minute:$second';
+}
+
 String formatStringIfDate(String value) {
   final parsedDate = DateTime.tryParse(value);
   if (parsedDate != null && value.contains('T') && value.length >= 10) {
