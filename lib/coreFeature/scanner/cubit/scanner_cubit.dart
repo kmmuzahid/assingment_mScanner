@@ -18,17 +18,13 @@ class ScannerCubit extends Cubit<ScannerState> {
   String? latestBarcode;
   String? _persistedFilePath;
 
-  /// Tracks barcode value → count during a sampling cycle.
   final Map<String, int> _scanSamples = {};
   Timer? _sampleTimer;
 
-  /// Minimum number of samples before we attempt a majority check.
   static const int _minSamples = 8;
 
-  /// Maximum number of samples before we force-pick the best result.
   static const int _maxSamples = 15;
 
-  /// Fraction of total samples a value must reach to be considered accurate.
   static const double _confidenceThreshold = 1;
 
   ScannerCubit() : super(ScannerState()) {
@@ -235,7 +231,6 @@ class ScannerCubit extends Cubit<ScannerState> {
       ..insert(0, newItem);
 
     emit(state.copyWith(inspectionList: updatedList));
-    _persist(updatedList);
   }
 
   /// Loads an existing list item into the Code/Quantity fields for editing.
@@ -382,7 +377,6 @@ class ScannerCubit extends Cubit<ScannerState> {
         editingIndex: -1,
       ),
     );
-    _persist(updatedList);
     showMessage('Updated');
   }
 
