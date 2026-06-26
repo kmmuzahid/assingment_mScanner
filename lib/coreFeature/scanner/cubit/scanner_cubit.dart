@@ -88,8 +88,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     }
   }
 
-  /// Called by the MobileScanner widget on every barcode detection frame.
-  /// During sampling, it just records the value into [_scanSamples].
   void onBarcodeDetect(BarcodeCapture capture) {
     if (!state.isScanning) return;
     if (state.isFieldFocused) return;
@@ -104,7 +102,6 @@ class ScannerCubit extends Cubit<ScannerState> {
         emit(state.copyWith(lastScannedCode: ''));
       }
 
-      // If we are in the sampling phase, just record the sample.
       if (state.isSampling) {
         _scanSamples[value] = (_scanSamples[value] ?? 0) + 1;
         return;
@@ -120,13 +117,10 @@ class ScannerCubit extends Cubit<ScannerState> {
     }
   }
 
-  // ─── Multi-sample scanning ───────────────────────────────────────
-
   void _startSampling() {
     _scanSamples.clear();
     _sampleTimer?.cancel();
 
-    // Enter scanning + sampling mode.
     emit(state.copyWith(isScanning: true, isSampling: true, sampleCount: 0));
 
     var tickCount = 0;
@@ -137,7 +131,6 @@ class ScannerCubit extends Cubit<ScannerState> {
 
       emit(state.copyWith(sampleCount: totalSamples));
 
-      // Check for a confident result once we have enough samples.
       if (totalSamples >= _minSamples) {
         final bestEntry = _scanSamples.entries.reduce(
           (a, b) => a.value >= b.value ? a : b,
@@ -146,13 +139,11 @@ class ScannerCubit extends Cubit<ScannerState> {
         final confidence = bestEntry.value / totalSamples;
 
         if (confidence >= _confidenceThreshold) {
-          // We have a confident result (100% match).
           _finishSampling(bestEntry.key);
           return;
         }
       }
 
-      // Safety: reset and retry after _maxSamples ticks.
       if (tickCount >= _maxSamples) {
         if (_scanSamples.isNotEmpty) {
           final bestEntry = _scanSamples.entries.reduce(
@@ -164,7 +155,6 @@ class ScannerCubit extends Cubit<ScannerState> {
             return;
           }
         }
-        // If we hit the limit without 100% confidence, restart sampling for a clean attempt
         _startSampling();
       }
     });
@@ -207,7 +197,6 @@ class ScannerCubit extends Cubit<ScannerState> {
       _addItem(value, 'Barcode', state.quantity);
     }
 
-    // Automatically start scanning for the next barcode.
     _startSampling();
   }
 
@@ -216,8 +205,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     _sampleTimer = null;
     _scanSamples.clear();
   }
-
-  // ─── List management ─────────────────────────────────────────────
 
   void _addItem(String value, String type, int quantity) {
     final newItem = InspectionItem(
@@ -234,7 +221,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     emit(state.copyWith(inspectionList: updatedList));
   }
 
-  /// Loads an existing list item into the Code/Quantity fields for editing.
   void selectItemForEdit(int index) {
     if (index < 0 || index >= state.inspectionList.length) return;
     final item = state.inspectionList[index];
@@ -294,7 +280,6 @@ class ScannerCubit extends Cubit<ScannerState> {
         .where((e) => e.isNotEmpty)
         .toList();
     if (lines.isEmpty) return '';
-    // Join all non-empty lines with a space, and collapse multiple spaces into a single space
     return lines.join(' ').replaceAll(RegExp(r'\s+'), ' ');
   }
 
@@ -389,8 +374,6 @@ class ScannerCubit extends Cubit<ScannerState> {
     showMessage('Updated');
   }
 
-  /// Saves the full inspection list as CSV. Returns `true` on success so the
-  /// UI can pop the screen.
   Future<bool> saveAndExport() async {
     if (state.inspectionList.isEmpty) {
       showMessage('Nothing to save');
